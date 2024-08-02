@@ -6,7 +6,8 @@
  * @author Bryce Schmisseur
  */
 
-const currentUser = require('../session/storage')
+const User = require('../../models/user');
+const EncryptionEngine = require('../utils/encryption_engine')
 
 /**
  * @brief Middleware function to authenticate the current username and password
@@ -15,7 +16,7 @@ const currentUser = require('../session/storage')
  * @param {*} res - current response object
  * @param {*} next - the next function call for the request
  */
-const basicAuthentication = ( req, res, next ) => {
+const basicAuthentication = async ( req, res, next ) => {
     // Parse the authentication header from the current request; return error if none
     const authenticationHeader = req.header.authorization;
 
@@ -23,17 +24,24 @@ const basicAuthentication = ( req, res, next ) => {
         return res.status(401).send('Authentication required!');
     }
 
-    // Parse out the type of authentication and credentials; return error if not Basic
-    const [ scheme , credentials ] = authenticationHeader.split(' ');
+    // Parse out the type of authentication and password; return error if not Basic
+    const [ scheme , password ] = authenticationHeader.split(' ');
 
     if ( scheme !== "Basic" ){
         return res.status(401).send("Invalid authentication scheme!");
     }
 
-    // Decode and compare the credentials to the current user's credentials; call next function on success
-    const [username, password] = Buffer.from(credentials, 'base64').toString().split(":");
+    // Retrieve the current user
+    user = await User.find({username: req.params.username});
+    if (user == null) {
+        //If no users are found associated with the id an HTTP 404 RESPONSE will be send back
+        res.status(404).json({ message: `Can not find the associated user's account`})
+    }
 
-    if (currentUser.username === username && currentUser.password === password)
+    // Call encryption engine to validate teh password
+    validPassword = EncryptionEngine.verifyPassword(password, user.password);
+
+    if (validPassword == true)
     {
         return next();
     }

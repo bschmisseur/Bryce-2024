@@ -9,6 +9,8 @@
 const express = require('express');
 const router = express.router();
 const User = require('../../models/user');
+const EncryptionEngine = require('../../utils/encryption_engine')
+const Authentication = require('../../middleware/authentication')
 
 /**
  * @brief Get request to see if a username is already included in the database
@@ -25,7 +27,7 @@ router.get('/:username', async (req, res) => {
         user = await User.find({username: req.params.username})
         if (user == null) {
             //If no users are found associated with the id an HTTP 404 RESPONSE will be send back
-            res.status(404).json({ message: 'Cant find any users'})
+            res.status(404).json({ message: `Can not find user with username '${username}'!`})
         } else {
             //Response with the full user object
             res.json({validUser: true})
@@ -71,10 +73,14 @@ router.get('/publickey/:username', async (req, res) => {
  * @return {User} user - the saved user's information to the database
  */
 router.post('/', async (req, res) => {
+
+    // Create hash of password
+    const hashedPassword = EncryptionEngine.hashPassword(req.body.password);
+
     //Creates user object based on body parameters of the HTTP request
     const user = new User({
         username: req.body.username,
-        password: req.body.password,
+        password: hashedPassword,
         publicKey: ""
     });
     try {
@@ -96,7 +102,7 @@ router.post('/', async (req, res) => {
  * 
  * @return {User} user - the updated user's information to the database
  */
-router.post('/update', async (req, res) => {
+router.post('/update', Authentication, async (req, res) => {
     try {
         User.findOneAndUpdate({_id: req.body._id}, {$set: {publicKey: req.body.publicKey}}, {new: true, upsert: true}, function (err, user) {
             if ( err ) {
