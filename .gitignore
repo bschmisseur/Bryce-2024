@@ -1,0 +1,14 @@
+##
+# @file .gitignore 
+#
+# @brief This file specifies files or paths that git should and should
+# not be inlcuded in the current git repository
+#
+# @author Bryce Schmisseur
+#
+
+# Remove all Node Modules
+node_modules/**/*
+
+# Include the routes folder
+!routes/**/*
