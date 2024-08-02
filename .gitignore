@@ -12,3 +12,4 @@ node_modules/**/*
 
 # Include the routes folder
 !routes/**/*
+!utils/**/*
