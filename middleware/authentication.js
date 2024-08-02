@@ -14,8 +14,6 @@ const currentUser = require('../session/storage')
  * @param {*} req - current request object
  * @param {*} res - current response object
  * @param {*} next - the next function call for the request
- * 
- * @returns 
  */
 const basicAuthentication = ( req, res, next ) => {
     // Parse the authentication header from the current request; return error if none
