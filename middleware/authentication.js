@@ -6,7 +6,7 @@
  * @author Bryce Schmisseur
  */
 
-const User = require('../../models/user');
+const User = require('../models/user');
 const EncryptionEngine = require('../utils/encryption_engine')
 
 /**
@@ -41,6 +41,7 @@ const basicAuthentication = async ( req, res, next ) => {
     // Call encryption engine to validate teh password
     validPassword = EncryptionEngine.verifyPassword(password, user.password);
 
+    // If the passwords match; continue to next function
     if (validPassword == true)
     {
         return next();

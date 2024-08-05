@@ -7,7 +7,7 @@
  */
 
 const express = require('express');
-const router = express.router();
+const router = express.Router();
 const User = require('../../models/user');
 const EncryptionEngine = require('../../utils/encryption_engine')
 const Authentication = require('../../middleware/authentication')
@@ -73,17 +73,17 @@ router.get('/publickey/:username', async (req, res) => {
  * @return {User} user - the saved user's information to the database
  */
 router.post('/', async (req, res) => {
-
-    // Create hash of password
-    const hashedPassword = EncryptionEngine.hashPassword(req.body.password);
-
-    //Creates user object based on body parameters of the HTTP request
-    const user = new User({
-        username: req.body.username,
-        password: hashedPassword,
-        publicKey: ""
-    });
     try {
+        // Create hash of password
+        const hashedPassword = EncryptionEngine.hashPassword(req.body.password);
+
+        //Creates user object based on body parameters of the HTTP request
+        const user = new User({
+            username: req.body.username,
+            password: hashedPassword,
+            publicKey: ""
+        });
+
         //Saves the user object to MongoDB
         const newUser = await user.save()
   
@@ -93,7 +93,7 @@ router.post('/', async (req, res) => {
         //If any error is caught a HTTP 500 RESPONSE is set back with the error message
         res.status(500).json({ message: err.message })
     }
-})
+});
 
 /**
  * @brief Post request to be able to update the publicKey field of the user
@@ -104,7 +104,8 @@ router.post('/', async (req, res) => {
  */
 router.post('/update', Authentication, async (req, res) => {
     try {
-        User.findOneAndUpdate({_id: req.body._id}, {$set: {publicKey: req.body.publicKey}}, {new: true, upsert: true}, function (err, user) {
+        // Find and update the current user object
+        User.findOneAndUpdate({username: req.body.username}, {$set: {publicKey: req.body.publicKey}}, {new: true, upsert: true}, function (err, user) {
             if ( err ) {
                 res.status(404).json({ message: 'Cant find any users'})
             } else {
@@ -114,4 +115,32 @@ router.post('/update', Authentication, async (req, res) => {
     } catch (err) {
         res.status(500).json({ message: err.message })
     }
+});
+
+
+router.post('/validate', async (req, res) => {
+    try {
+        //Finds the user based on the user id
+        user = await User.find({username: req.body.username})
+
+        if (user == null) {
+            //If no users are found associated with the id an HTTP 404 RESPONSE will be send back
+            res.status(404).json({ message: `Can not find user with username '${username}'!`})
+        }
+
+        authenticatedUser = EncryptionEngine.verifyPassword(req.body.password, user.password)
+
+        if (authenticateUser == true) {
+            res.status(200).json(user)
+        }  else {
+            res.status(418).json({message: 'Invalid password!'})
+        }
+
+    } catch (err) {
+        //If any error is caught a HTTP 500 RESPONSE is set back with the error message
+        res.status(500).json({ message: err.message })
+    }
 })
+
+//Exports all routes to the index.js file
+module.exports = router;

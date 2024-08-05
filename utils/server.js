@@ -37,6 +37,6 @@ exports.startServer = function () {
 
     //Starts to listen for request for the server=
     app.listen(PORT, () => {
-        console.log(`Example app listening at http://localhost:${PORT}`)
+        console.log(`Key Pair Encryption app listening at http://localhost:${PORT}`)
     });
 }

@@ -7,7 +7,7 @@
  */
 
 const express = require('express')
-const router = express.router()
+const router = express.Router()
 const User = require('../../models/user');
 const EncryptionEngine = require('../../utils/encryption_engine')
 
@@ -43,3 +43,6 @@ router.get('/verifyMessage', async (req, res) => {
         res.status(500).json({ message: err.message })
     }
 });
+
+//Exports all routes to the index.js file
+module.exports = router;

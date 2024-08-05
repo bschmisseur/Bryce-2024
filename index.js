@@ -7,25 +7,21 @@
  * @author Bryce Schmisseur
  */
 
+const Server = require('./utils/server')
+const Client = require('./utils/client')
+
+console.log("Starting application...")
+
 /**
  * Start server
  */
+console.log("Starting Server...")
+Server.startServer()
 
 /**
- * Retrieve username from user
+ * Start client application
  */
+Client.runClient()
 
-/**
- * Conditional check to see if user is registered
- */
-
-/**
- * Retrieve and validate password from user
- */
-
-/**
- * Wait for user input
- */
-
-console.log("Hello World!")
+return 0
 
